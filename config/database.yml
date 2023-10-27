@@ -1,0 +1,24 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  host: db
+  username: postgres
+  password: postgres
+  database: anti_fraud_development
+
+test:
+  <<: *default
+  host: db
+  username: postgres
+  password: postgres
+  database: anti_fraud_test
+
+production:
+  <<: *default
+  database: anti_fraud_production
+  username: anti_fraud
+  password: <%= ENV["ANTI_FRAUD_DATABASE_PASSWORD"] %>
