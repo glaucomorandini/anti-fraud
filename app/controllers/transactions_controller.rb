@@ -4,8 +4,11 @@ class TransactionsController < ApplicationController
   def create
     @transaction = Transaction.new(transaction_params)
 
+    @transaction.fraud = FraudDetectorService.new(@transaction).call
+
     if @transaction.save
-      render json: @transaction, status: :created, location: @transaction
+      response = { transaction_id: @transaction.id, recommendation: @transaction.fraud ? 'decline' : 'approve' }
+      render json: response, status: :created, location: @transaction
     else
       render json: @transaction.errors, status: :unprocessable_entity
     end
