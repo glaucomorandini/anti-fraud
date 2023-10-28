@@ -38,7 +38,7 @@ gem 'bootsnap', require: false
 # gem "rack-cors"
 
 group :development, :test do
-  gem 'database_cleaner-active_record'
+  gem 'database_cleaner'
   gem 'debug', platforms: %i[mri mingw x64_mingw]
   gem 'factory_bot_rails'
   gem 'faker'
