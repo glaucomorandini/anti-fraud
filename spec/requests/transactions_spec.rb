@@ -19,11 +19,20 @@ RSpec.describe '/transactions', type: :request do
   # Transaction. As you add validations to Transaction, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) do
-    skip('Add a hash of attributes valid for your model')
+    {
+      transaction_id: 1,
+      merchant_id: 2,
+      user_id: 3,
+      card_number: Faker::Finance.credit_card,
+      transaction_date: Time.current,
+      transaction_amount: 9.99,
+      device_id: 4,
+      has_cbk: false
+    }
   end
 
   let(:invalid_attributes) do
-    skip('Add a hash of attributes invalid for your model')
+    { transaction_id: nil }
   end
 
   # This should return the minimal set of values that should be in the headers
