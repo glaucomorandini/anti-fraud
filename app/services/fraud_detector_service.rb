@@ -1,18 +1,20 @@
 # frozen_string_literal: true
 
 class FraudDetectorService
-  HIGH_AMOUNT_THRESHOLD = 1000.00
+  HIGH_AMOUNT_THRESHOLD = 1453.57
   SUSPICIOUS_HOURS = (0..6).to_a
   MAX_TRANSACTIONS_IN_PERIOD = 5
   MAX_AMOUNT_IN_PERIOD = 5000.00
   TIME_PERIOD = 1.hour
   TRANSACTIONS_WITHOUT_DEVICE_ID = 2
+  DAYS_WITH_SAME_DEVICE = 75.days
 
   HIGH_AMOUNT_THRESHOLD_POINTS = 2
   SUSPICIOUS_HOURS_POINTS = 1
   MAX_TRANSACTIONS_IN_PERIOD_POINTS = 3
   MAX_AMOUNT_IN_PERIOD_POINTS = 4
   TRANSACTIONS_WITHOUT_DEVICE_ID_POINTS = 2
+  DAYS_WITH_SAME_DEVICE_POINTS = -3
   CHARGEBACK_POINTS = 5
 
   FRAUD_THRESHOLD = 6
@@ -23,7 +25,8 @@ class FraudDetectorService
     too_many_transactions?: MAX_TRANSACTIONS_IN_PERIOD_POINTS,
     high_value_transactions?: MAX_AMOUNT_IN_PERIOD_POINTS,
     previous_chargeback?: CHARGEBACK_POINTS,
-    transaction_without_device_id?: TRANSACTIONS_WITHOUT_DEVICE_ID_POINTS
+    transaction_without_device_id?: TRANSACTIONS_WITHOUT_DEVICE_ID_POINTS,
+    days_with_same_device?: DAYS_WITH_SAME_DEVICE
   }.freeze
 
   def initialize(transaction)
@@ -75,5 +78,11 @@ class FraudDetectorService
 
   def transaction_without_device_id?
     cc_transactions.where(device_id: nil).count >= TRANSACTIONS_WITHOUT_DEVICE_ID
+  end
+
+  def days_with_same_device?
+    cc_transactions.where(device_id: @transaction.device_id)
+                   .where('transaction_date < ?', DAYS_WITH_SAME_DEVICE.ago)
+                   .exists?
   end
 end

@@ -79,7 +79,7 @@ RSpec.describe FraudDetectorService do
 
   describe 'high_amount?' do
     context 'when the transaction amount is above the threshold' do
-      let(:transaction) { build(:transaction, transaction_amount: 1200.00) }
+      let(:transaction) { build(:transaction, transaction_amount: 1500.00) }
 
       it 'returns true' do
         expect(described_class.new(transaction).send(:high_amount?)).to eq(true)
@@ -187,6 +187,25 @@ RSpec.describe FraudDetectorService do
     context 'when has a device id' do
       it 'when has not two or more transactions without device id' do
         expect(described_class.new(transaction).send(:transaction_without_device_id?)).to eq(false)
+      end
+    end
+  end
+
+  describe 'days_with_same_device?' do
+    context 'when there is a transaction with the same device_id for the same card for more than 75 days' do
+      it 'returns true' do
+        FactoryBot.create(:transaction,
+                          card_number: transaction.card_number,
+                          device_id: transaction.device_id,
+                          transaction_date: transaction.transaction_date - 76.days)
+
+        expect(described_class.new(transaction).send(:days_with_same_device?)).to eq(true)
+      end
+    end
+
+    context 'when has a device id' do
+      it 'when has not two or more transactions without device id' do
+        expect(described_class.new(transaction).send(:days_with_same_device?)).to eq(false)
       end
     end
   end
