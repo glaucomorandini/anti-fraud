@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class BlackListService
+class BlockListService
   CHARGEBACK_PERCENT_LIMIT_PER_MERCHANT = 10
   CHARGEBACK_PERCENT_LIMIT_PER_DEVICE = 10
   CHARGEBACK_PERCENT_LIMIT_PER_USER = 10
@@ -15,30 +15,30 @@ class BlackListService
   end
 
   def call
-    percent_per_merchant || percent_per_device || percent_per_user || percent_per_card_number
+    percent_per_merchant? || percent_per_device? || percent_per_user? || percent_per_card_number?
   end
 
   private
 
-  def percent_per_merchant
+  def percent_per_merchant?
     transactions = Transaction.where(merchant_id: @merchant_id)
 
     percent_cbk(transactions) > CHARGEBACK_PERCENT_LIMIT_PER_MERCHANT
   end
 
-  def percent_per_device
+  def percent_per_device?
     transactions = Transaction.where(device_id: @device_id)
 
     percent_cbk(transactions) > CHARGEBACK_PERCENT_LIMIT_PER_DEVICE
   end
 
-  def percent_per_user
+  def percent_per_user?
     transactions = Transaction.where(user_id: @user_id)
 
     percent_cbk(transactions) > CHARGEBACK_PERCENT_LIMIT_PER_USER
   end
 
-  def percent_per_card_number
+  def percent_per_card_number?
     transactions = Transaction.where(card_number: @card_number)
 
     percent_cbk(transactions) > CHARGEBACK_PERCENT_LIMIT_PER_CARD_NUMBER

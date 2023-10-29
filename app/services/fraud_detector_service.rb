@@ -7,9 +7,9 @@ class FraudDetectorService
   end
 
   def call
-    device_id? ||
+    BlockListService.new(@transaction).call ||
+      device_id? ||
       uncontested_fraud? ||
-      BlackListService.new(@transaction).call ||
       FraudScoreService.new(@transaction).call
   end
 

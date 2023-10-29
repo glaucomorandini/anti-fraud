@@ -8,7 +8,7 @@ RSpec.describe FraudScoreService do
   describe '#call' do
     context 'when exceeds the score limit' do
       let(:cbk_transaction) { create(:transaction, has_cbk: true) }
-      let(:transaction) { build(:transaction, card_number: cbk_transaction.card_number, transaction_amount: 1200.00) }
+      let(:transaction) { build(:transaction, card_number: cbk_transaction.card_number, transaction_amount: 1500.00) }
 
       it 'returns true' do
         expect(described_class.new(transaction).call).to eq(true)
