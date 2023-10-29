@@ -35,6 +35,7 @@ class FraudScoreService
   end
 
   def call
+    preload_transaction_data
     fraud_score >= FRAUD_THRESHOLD
   end
 
@@ -42,6 +43,16 @@ class FraudScoreService
 
   def cc_transactions
     @cc_transactions ||= Transaction.where(card_number: @card_number)
+  end
+
+  def preload_transaction_data
+    @recent_transactions = cc_transactions.where('transaction_date > ?', TIME_PERIOD.ago)
+    @total_recent_amount = @recent_transactions.sum(:transaction_amount)
+    @recent_transactions_count = @recent_transactions.count
+    @device_id_transactions_count = cc_transactions.where(device_id: nil).count
+    @old_device_transactions_exists = cc_transactions.where(device_id: @transaction.device_id)
+                                                     .where('transaction_date < ?', DAYS_WITH_SAME_DEVICE.ago)
+                                                     .exists?
   end
 
   def fraud_score
@@ -57,11 +68,11 @@ class FraudScoreService
   end
 
   def too_many_transactions?
-    cc_transactions.where('transaction_date > ?', TIME_PERIOD.ago).count > MAX_TRANSACTIONS_IN_PERIOD
+    @recent_transactions_count > MAX_TRANSACTIONS_IN_PERIOD
   end
 
   def high_value_transactions?
-    cc_transactions.where('transaction_date > ?', TIME_PERIOD.ago).sum(:transaction_amount) > MAX_AMOUNT_IN_PERIOD
+    @total_recent_amount > MAX_AMOUNT_IN_PERIOD
   end
 
   def previous_chargeback?
@@ -69,12 +80,10 @@ class FraudScoreService
   end
 
   def transaction_without_device_id?
-    cc_transactions.where(device_id: nil).count >= TRANSACTIONS_WITHOUT_DEVICE_ID
+    @device_id_transactions_count >= TRANSACTIONS_WITHOUT_DEVICE_ID
   end
 
   def days_with_same_device?
-    cc_transactions.where(device_id: @transaction.device_id)
-                   .where('transaction_date < ?', DAYS_WITH_SAME_DEVICE.ago)
-                   .exists?
+    @old_device_transactions_exists
   end
 end

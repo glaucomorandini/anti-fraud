@@ -72,8 +72,10 @@ RSpec.describe FraudScoreService do
     context 'when many transactions are made in a short period of time' do
       it 'returns true' do
         FactoryBot.create_list(:transaction, 6, card_number: transaction.card_number)
+        subject = described_class.new(transaction)
+        subject.send(:preload_transaction_data)
 
-        expect(described_class.new(transaction).send(:too_many_transactions?)).to eq(true)
+        expect(subject.send(:too_many_transactions?)).to eq(true)
       end
     end
 
@@ -83,8 +85,10 @@ RSpec.describe FraudScoreService do
                                card_number: transaction.card_number,
                                transaction_date: Faker::Time.between_dates(from: Date.today - 10,
                                                                            to: Date.today - 10 - 1))
+        subject = described_class.new(transaction)
+        subject.send(:preload_transaction_data)
 
-        expect(described_class.new(transaction).send(:too_many_transactions?)).to eq(false)
+        expect(subject.send(:too_many_transactions?)).to eq(false)
       end
     end
   end
@@ -93,8 +97,10 @@ RSpec.describe FraudScoreService do
     context 'when the value of transactions made in a short period of time is high' do
       it 'returns true' do
         FactoryBot.create_list(:transaction, 6, card_number: transaction.card_number, transaction_amount: 1200.00)
+        subject = described_class.new(transaction)
+        subject.send(:preload_transaction_data)
 
-        expect(described_class.new(transaction).send(:high_value_transactions?)).to eq(true)
+        expect(subject.send(:high_value_transactions?)).to eq(true)
       end
     end
 
@@ -104,8 +110,10 @@ RSpec.describe FraudScoreService do
                                card_number: transaction.card_number,
                                transaction_date: Faker::Time.between_dates(from: Date.today - 10,
                                                                            to: Date.today - 10 - 1))
+        subject = described_class.new(transaction)
+        subject.send(:preload_transaction_data)
 
-        expect(described_class.new(transaction).send(:high_value_transactions?)).to eq(false)
+        expect(subject.send(:high_value_transactions?)).to eq(false)
       end
     end
   end
@@ -133,15 +141,20 @@ RSpec.describe FraudScoreService do
   describe 'transaction_without_device_id?' do
     context 'when has two transactions without device id' do
       it 'returns true' do
-        FactoryBot.create_list(:transaction, 2, card_number: transaction.card_number, device_id: nil)
+        FactoryBot.create_list(:transaction, 3, card_number: transaction.card_number, device_id: nil)
+        subject = described_class.new(transaction)
+        subject.send(:preload_transaction_data)
 
-        expect(described_class.new(transaction).send(:transaction_without_device_id?)).to eq(true)
+        expect(subject.send(:transaction_without_device_id?)).to eq(true)
       end
     end
 
     context 'when has a device id' do
       it 'when has not two or more transactions without device id' do
-        expect(described_class.new(transaction).send(:transaction_without_device_id?)).to eq(false)
+        subject = described_class.new(transaction)
+        subject.send(:preload_transaction_data)
+
+        expect(subject.send(:transaction_without_device_id?)).to eq(false)
       end
     end
   end
@@ -153,14 +166,19 @@ RSpec.describe FraudScoreService do
                           card_number: transaction.card_number,
                           device_id: transaction.device_id,
                           transaction_date: transaction.transaction_date - 76.days)
+        subject = described_class.new(transaction)
+        subject.send(:preload_transaction_data)
 
-        expect(described_class.new(transaction).send(:days_with_same_device?)).to eq(true)
+        expect(subject.send(:days_with_same_device?)).to eq(true)
       end
     end
 
     context 'when has a device id' do
       it 'when has not two or more transactions without device id' do
-        expect(described_class.new(transaction).send(:days_with_same_device?)).to eq(false)
+        subject = described_class.new(transaction)
+        subject.send(:preload_transaction_data)
+
+        expect(subject.send(:days_with_same_device?)).to eq(false)
       end
     end
   end
