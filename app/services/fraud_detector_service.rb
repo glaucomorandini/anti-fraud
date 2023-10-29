@@ -34,6 +34,10 @@ class FraudDetectorService
 
   private
 
+  def transactions
+    @transactions ||= Transaction.where(card_number: @card_number)
+  end
+
   def fraud_score
     FRAUD_RULES.sum { |method, points| send(method) ? points : 0 }
   end
@@ -43,7 +47,7 @@ class FraudDetectorService
   end
 
   def uncontested_fraud?
-    Transaction.where(card_number: @card_number, fraud: true, contested_fraud: false).exists?
+    transactions.where(fraud: true, contested_fraud: false).exists?
   end
 
   def high_amount?
@@ -55,15 +59,11 @@ class FraudDetectorService
   end
 
   def too_many_transactions?
-    Transaction.where(card_number: @card_number)
-               .where('transaction_date > ?', TIME_PERIOD.ago)
-               .count > MAX_TRANSACTIONS_IN_PERIOD
+    transactions.where('transaction_date > ?', TIME_PERIOD.ago).count > MAX_TRANSACTIONS_IN_PERIOD
   end
 
   def high_value_transactions?
-    Transaction.where(card_number: @card_number)
-               .where('transaction_date > ?', TIME_PERIOD.ago)
-               .sum(:transaction_amount) > MAX_AMOUNT_IN_PERIOD
+    transactions.where('transaction_date > ?', TIME_PERIOD.ago).sum(:transaction_amount) > MAX_AMOUNT_IN_PERIOD
   end
 
   def previous_chargeback?
