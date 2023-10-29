@@ -4,7 +4,7 @@ class TransactionsController < ApplicationController
   def create
     @transaction = Transaction.new(transaction_params)
 
-    @transaction.fraud = BlackListService.new(@transaction).call || FraudDetectorService.new(@transaction).call
+    @transaction.fraud = BlackListService.new(@transaction).call || FraudScoreService.new(@transaction).call
 
     if @transaction.save
       response = { transaction_id: @transaction.id, recommendation: @transaction.fraud ? 'decline' : 'approve' }

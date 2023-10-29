@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe FraudDetectorService do
+RSpec.describe FraudScoreService do
   let(:transaction) { build(:transaction) }
 
   describe '#call' do

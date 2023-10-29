@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class FraudDetectorService
+class FraudScoreService
   HIGH_AMOUNT_THRESHOLD = 1453.57
   SUSPICIOUS_HOURS = (0..6).to_a
   MAX_TRANSACTIONS_IN_PERIOD = 5
