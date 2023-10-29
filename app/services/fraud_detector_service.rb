@@ -6,11 +6,13 @@ class FraudDetectorService
   MAX_TRANSACTIONS_IN_PERIOD = 5
   MAX_AMOUNT_IN_PERIOD = 5000.00
   TIME_PERIOD = 1.hour
+  TRANSACTIONS_WITHOUT_DEVICE_ID = 2
 
   HIGH_AMOUNT_THRESHOLD_POINTS = 2
   SUSPICIOUS_HOURS_POINTS = 1
   MAX_TRANSACTIONS_IN_PERIOD_POINTS = 3
   MAX_AMOUNT_IN_PERIOD_POINTS = 4
+  TRANSACTIONS_WITHOUT_DEVICE_ID_POINTS = 2
   CHARGEBACK_POINTS = 5
 
   FRAUD_THRESHOLD = 6
@@ -20,7 +22,8 @@ class FraudDetectorService
     suspicious_time?: SUSPICIOUS_HOURS_POINTS,
     too_many_transactions?: MAX_TRANSACTIONS_IN_PERIOD_POINTS,
     high_value_transactions?: MAX_AMOUNT_IN_PERIOD_POINTS,
-    previous_chargeback?: CHARGEBACK_POINTS
+    previous_chargeback?: CHARGEBACK_POINTS,
+    transaction_without_device_id?: TRANSACTIONS_WITHOUT_DEVICE_ID_POINTS
   }.freeze
 
   def initialize(transaction)
@@ -34,8 +37,8 @@ class FraudDetectorService
 
   private
 
-  def transactions
-    @transactions ||= Transaction.where(card_number: @card_number)
+  def cc_transactions
+    @cc_transactions ||= Transaction.where(card_number: @card_number)
   end
 
   def fraud_score
@@ -47,7 +50,7 @@ class FraudDetectorService
   end
 
   def uncontested_fraud?
-    transactions.where(fraud: true, contested_fraud: false).exists?
+    cc_transactions.where(fraud: true, contested_fraud: false).exists?
   end
 
   def high_amount?
@@ -59,14 +62,18 @@ class FraudDetectorService
   end
 
   def too_many_transactions?
-    transactions.where('transaction_date > ?', TIME_PERIOD.ago).count > MAX_TRANSACTIONS_IN_PERIOD
+    cc_transactions.where('transaction_date > ?', TIME_PERIOD.ago).count > MAX_TRANSACTIONS_IN_PERIOD
   end
 
   def high_value_transactions?
-    transactions.where('transaction_date > ?', TIME_PERIOD.ago).sum(:transaction_amount) > MAX_AMOUNT_IN_PERIOD
+    cc_transactions.where('transaction_date > ?', TIME_PERIOD.ago).sum(:transaction_amount) > MAX_AMOUNT_IN_PERIOD
   end
 
   def previous_chargeback?
     Transaction.where(card_number: @card_number, has_cbk: true).exists?
+  end
+
+  def transaction_without_device_id?
+    cc_transactions.where(device_id: nil).count >= TRANSACTIONS_WITHOUT_DEVICE_ID
   end
 end

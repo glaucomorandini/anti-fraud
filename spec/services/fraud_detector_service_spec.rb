@@ -3,6 +3,8 @@
 require 'rails_helper'
 
 RSpec.describe FraudDetectorService do
+  let(:transaction) { build(:transaction) }
+
   describe '#call' do
     context 'when exceeds the score limit' do
       let(:cbk_transaction) { create(:transaction, has_cbk: true) }
@@ -40,8 +42,6 @@ RSpec.describe FraudDetectorService do
     end
 
     context 'when has a device id' do
-      let(:transaction) { build(:transaction) }
-
       it 'returns false' do
         expect(described_class.new(transaction).send(:device_id?)).to eq(false)
       end
@@ -115,8 +115,6 @@ RSpec.describe FraudDetectorService do
 
   describe 'too_many_transactions?' do
     context 'when many transactions are made in a short period of time' do
-      let(:transaction) { build(:transaction) }
-
       it 'returns true' do
         FactoryBot.create_list(:transaction, 6, card_number: transaction.card_number)
 
@@ -125,8 +123,6 @@ RSpec.describe FraudDetectorService do
     end
 
     context 'when many transactions are made over different periods of time' do
-      let(:transaction) { build(:transaction) }
-
       it 'returns false' do
         FactoryBot.create_list(:transaction, 6,
                                card_number: transaction.card_number,
@@ -140,8 +136,6 @@ RSpec.describe FraudDetectorService do
 
   describe 'high_value_transactions?' do
     context 'when the value of transactions made in a short period of time is high' do
-      let(:transaction) { build(:transaction) }
-
       it 'returns true' do
         FactoryBot.create_list(:transaction, 6, card_number: transaction.card_number, transaction_amount: 1200.00)
 
@@ -150,8 +144,6 @@ RSpec.describe FraudDetectorService do
     end
 
     context 'when the value of transactions made over different period of time is high' do
-      let(:transaction) { build(:transaction) }
-
       it 'returns false' do
         FactoryBot.create_list(:transaction, 6,
                                card_number: transaction.card_number,
@@ -179,6 +171,22 @@ RSpec.describe FraudDetectorService do
 
       it 'returns false' do
         expect(described_class.new(transaction).send(:previous_chargeback?)).to eq(false)
+      end
+    end
+  end
+
+  describe 'transaction_without_device_id?' do
+    context 'when has two transactions without device id' do
+      it 'returns true' do
+        FactoryBot.create_list(:transaction, 2, card_number: transaction.card_number, device_id: nil)
+
+        expect(described_class.new(transaction).send(:transaction_without_device_id?)).to eq(true)
+      end
+    end
+
+    context 'when has a device id' do
+      it 'when has not two or more transactions without device id' do
+        expect(described_class.new(transaction).send(:transaction_without_device_id?)).to eq(false)
       end
     end
   end
