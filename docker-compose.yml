@@ -4,6 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    tty: true
+    stdin_open: true
     ports:
       - "3000:3000"
     volumes:
@@ -14,7 +16,7 @@ services:
       - db
 
   db:
-    image: postgres
+    image: postgres:16
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
