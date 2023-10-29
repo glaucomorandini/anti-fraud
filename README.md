@@ -1,5 +1,9 @@
 # Anti-Fraud Application
 
+## Proposal
+The proposal of this application is to solve the test presented by CloudWalk for the Software Engineer position. In addition to the technical test, two more challenges were proposed: the first, where it was necessary to answer a series of questions, and the second, to analyze previously available data, which would be important for the development of the third challenge (technical test).
+[Document with the first two challenges.](https://docs.google.com/document/d/1bmUV6HlEelHSwnbymiNOu_LiTx8VW0vHE4DP1k8R3x0/edit?usp=sharing)
+
 ## Overview
 The "anti-fraud" application is a Ruby on Rails solution designed for detecting and preventing fraud in transactions. It utilizes various services and parameters to assess transactions and determine their fraudulent nature.
 
