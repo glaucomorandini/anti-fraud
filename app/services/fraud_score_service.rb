@@ -35,7 +35,7 @@ class FraudScoreService
   end
 
   def call
-    device_id? || uncontested_fraud? || fraud_score >= FRAUD_THRESHOLD
+    fraud_score >= FRAUD_THRESHOLD
   end
 
   private
@@ -46,14 +46,6 @@ class FraudScoreService
 
   def fraud_score
     FRAUD_RULES.sum { |method, points| send(method) ? points : 0 }
-  end
-
-  def device_id?
-    @transaction.device_id.blank?
-  end
-
-  def uncontested_fraud?
-    cc_transactions.where(fraud: true, contested_fraud: false).exists?
   end
 
   def high_amount?
