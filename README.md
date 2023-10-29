@@ -1,24 +1,59 @@
-# README
+# Anti-Fraud Application
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Overview
+The "anti-fraud" application is a Ruby on Rails solution designed for detecting and preventing fraud in transactions. It utilizes various services and parameters to assess transactions and determine their fraudulent nature.
 
-Things you may want to cover:
+## Key Components
 
-* Ruby version
+### Fraud Detection Service
+- **File:** [`app/services/fraud_detector_service.rb`](https://github.com/glaucomorandini/anti-fraud/blob/main/app/services/fraud_detector_service.rb)
+- **Purpose:** Evaluates transaction fraudulence.
+- **Criteria:** Device ID presence, previous uncontested frauds, and additional assessments using other services.
 
-* System dependencies
+### Fraud Scoring Service
+- **File:** [`app/services/fraud_score_service.rb`](https://github.com/glaucomorandini/anti-fraud/blob/main/app/services/fraud_score_service.rb)
+- **Purpose:** Calculates a fraud score.
+- **Scoring Rules:** Transaction amount, time, frequency, chargeback history, device ID absence, and device usage duration.
 
-* Configuration
+### Blocklist Service
+- **File:** [`app/services/block_list_service.rb`](https://github.com/glaucomorandini/anti-fraud/blob/main/app/services/block_list_service.rb)
+- **Purpose:** Identifies high-risk entities.
+- **Criteria:** Chargeback rates per merchant, device, user, and card number.
 
-* Database creation
+## Summary
+The application analyzes financial transactions to identify and prevent fraudulent activities, using a comprehensive set of rules and services.
 
-* Database initialization
+## Technology Versions
 
-* How to run the test suite
+- **Ruby:** 3.2.1
+- **Rails:** 7.1.1
+- **PostgreSQL:** 15
 
-* Services (job queues, cache servers, search engines, etc.)
+## Application Setup
 
-* Deployment instructions
+### Dependencies
 
-* ...
+- [Docker](https://www.docker.com/): Required for containerization and environment consistency.
+
+### Environment Configuration
+
+To set up the environment, use the following Docker commands:
+
+- Build the web service: `docker-compose build web`
+- Create, migrate, and seed the database: `docker-compose run --rm web rails db:create db:migrate db:seed`
+
+### Running the Environment
+
+To start the application, run:
+
+`docker-compose up web`
+
+The service will be available at [http://localhost:3000](http://localhost:3000).
+
+### Executing Tests
+
+To run the test suite, use the command:
+
+- `docker-compose run --rm web rspec`
+
+This will execute the application's test cases to ensure functionality and stability.
