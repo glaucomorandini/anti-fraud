@@ -21,30 +21,38 @@ class BlackListService
   private
 
   def percent_per_merchant
-    total_transactions = Transaction.where(merchant_id: @merchant_id).count
-    total_chargebacks = Transaction.where(merchant_id: @merchant_id, has_cbk: true).count
+    transactions = Transaction.where(merchant_id: @merchant_id)
 
-    total_chargebacks.to_f / total_transactions.to_f * 100 > CHARGEBACK_PERCENT_LIMIT_PER_MERCHANT
+    percent_cbk(transactions) > CHARGEBACK_PERCENT_LIMIT_PER_MERCHANT
   end
 
   def percent_per_device
-    total_transactions = Transaction.where(device_id: @device_id).count
-    total_chargebacks = Transaction.where(device_id: @device_id, has_cbk: true).count
+    transactions = Transaction.where(device_id: @device_id)
 
-    total_chargebacks.to_f / total_transactions.to_f * 100 > CHARGEBACK_PERCENT_LIMIT_PER_DEVICE
+    percent_cbk(transactions) > CHARGEBACK_PERCENT_LIMIT_PER_DEVICE
   end
 
   def percent_per_user
-    total_transactions = Transaction.where(user_id: @user_id).count
-    total_chargebacks = Transaction.where(user_id: @user_id, has_cbk: true).count
+    transactions = Transaction.where(user_id: @user_id)
 
-    total_chargebacks.to_f / total_transactions.to_f * 100 > CHARGEBACK_PERCENT_LIMIT_PER_USER
+    percent_cbk(transactions) > CHARGEBACK_PERCENT_LIMIT_PER_USER
   end
 
   def percent_per_card_number
-    total_transactions = Transaction.where(card_number: @card_number).count
-    total_chargebacks = Transaction.where(card_number: @card_number, has_cbk: true).count
+    transactions = Transaction.where(card_number: @card_number)
 
-    total_chargebacks.to_f / total_transactions.to_f * 100 > CHARGEBACK_PERCENT_LIMIT_PER_CARD_NUMBER
+    percent_cbk(transactions) > CHARGEBACK_PERCENT_LIMIT_PER_CARD_NUMBER
+  end
+
+  def percent_cbk(transactions)
+    total_chargebacks(transactions).to_f / total_transactions(transactions) * 100
+  end
+
+  def total_transactions(transactions)
+    transactions.count
+  end
+
+  def total_chargebacks(transactions)
+    transactions.where(has_cbk: true).count
   end
 end
